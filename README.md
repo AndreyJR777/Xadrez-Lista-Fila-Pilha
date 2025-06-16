@@ -8,7 +8,7 @@ Necessário a instalação e utilização da linguagem, **Python**;
 
 # Como executar
   Baixe o código fonte do código;  
-    Extraia, então abra "main-folder" onde pode-se ver chess.py;
+    Extraia, então abra "main-folder" onde pode-se ver chess.py;  
       Abra o terminal (CMD, Command Prompt) neste local (ou execute "cd "local do arquivo"")  
         Insira o seguinte comando;  
           "python chess.py"  
