@@ -1,5 +1,19 @@
-# Array-Queue-Stack-Chess
+# Xadrez de Listas, Filas e Pilhas
 
+# Requisitos
+Necessário a instalação e utilização da linguagem, Python;
+  Recomendo a adição do Python ao caminho "PATH" durante instalação;
+    https://www.python.org/downloads/
+      "Add python.exe to PATH"
+
+# Como executar
+  Baixe o código fonte do código;
+    Extraia, então abra "main-folder" onde pode-se ver chess.py; README.txt; requirements.txt...
+      Abra o terminal (CMD, Command Prompt) neste local (ou execute "cd "local do arquivo"")
+        Insira o seguinte comando;
+          "python chess.py"
+
+# Caracteristicas Principais
 
 • Utilizar listas para organizar elementos dinâmicos do jogo (jogadores, recursos, áreas, pontuações etc.).
 • Utilizar filas para controle de turnos, ordens de chegada ou tarefas.
