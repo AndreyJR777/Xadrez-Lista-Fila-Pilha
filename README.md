@@ -1,6 +1,6 @@
 # Xadrez de Listas, Filas e Pilhas
 
-## Documentação e especificações se encontram do arquivo .pdf de nome Xadrez-Lista-Fila-Pilha
+### Documentação e especificações se encontram do arquivo .pdf de nome Xadrez-Lista-Fila-Pilha
 
 # Requisitos
 Necessário a instalação e utilização da linguagem, **Python**;  
