@@ -23,14 +23,11 @@ class Pawn(Piece):
     def moves(self, board, r, c):
         dirs = -1 if self.color=='w' else 1
         res = []
-        # avanço simples
         if board.empty(r+dirs, c):
             res.append((r+dirs, c))
-            # avanço duplo se na linha inicial
             start = 6 if self.color=='w' else 1
             if r == start and board.empty(r+2*dirs, c):
                 res.append((r+2*dirs, c))
-        # capturas
         for dc in (-1,1):
             if board.enemy(r+dirs, c+dc, self.color):
                 res.append((r+dirs, c+dc))
@@ -80,11 +77,9 @@ class Board:
         self._setup_initial()
 
     def _setup_initial(self):
-        # peões
         for c in range(BOARD_SIZE):
             self.grid[6][c] = Pawn('w')
             self.grid[1][c] = Pawn('b')
-        # demais peças
         order = [Rook, Night, Bishop, Queen, King, Bishop, Night, Rook]
         for c, cls in enumerate(order):
             self.grid[7][c] = cls('w')
@@ -142,25 +137,21 @@ class Game:
 
     def _draw_board(self):
         self.canvas.delete("all")
-        # desenha casas
         for r in range(BOARD_SIZE):
             for c in range(BOARD_SIZE):
                 x0, y0 = c*SQUARE_SIZE, r*SQUARE_SIZE
                 color = "#EEE" if (r+c)%2 else "#555"
                 self.canvas.create_rectangle(x0, y0, x0+SQUARE_SIZE, y0+SQUARE_SIZE,
                                              fill=color, outline="")
-        # highlight de seleção
         if self.selected:
             r, c = self.selected
             x0, y0 = c*SQUARE_SIZE, r*SQUARE_SIZE
             self.canvas.create_rectangle(x0, y0, x0+SQUARE_SIZE, y0+SQUARE_SIZE,
                                          outline="yellow", width=3)
-        # highlight de movimentos possíveis
         for (mr, mc) in self.possible_moves:
             x0, y0 = mc*SQUARE_SIZE, mr*SQUARE_SIZE
             self.canvas.create_rectangle(x0+5, y0+5, x0+SQUARE_SIZE-5, y0+SQUARE_SIZE-5,
                                          outline="cyan", width=2)
-        # desenha peças
         for r in range(BOARD_SIZE):
             for c in range(BOARD_SIZE):
                 p = self.board.grid[r][c]
@@ -172,11 +163,9 @@ class Game:
     def on_click(self, event):
         c = event.x // SQUARE_SIZE
         r = event.y // SQUARE_SIZE
-        if not self.board.valid(r, c):
-            return
+        if not self.board.valid(r, c): return
         cur = self.turns[0]
         p = self.board.grid[r][c]
-        # selecionar
         if self.selected is None:
             if p and p.color == cur:
                 self.selected = (r, c)
@@ -185,15 +174,15 @@ class Game:
             r0, c0 = self.selected
             piece = self.board.grid[r0][c0]
             if (r, c) in self.possible_moves:
-                # salva para undo
-                self.history.append((r0, c0, piece, r, c, self.board.grid[r][c]))
+                captured = self.board.grid[r][c]
+                self.history.append((r0, c0, piece, r, c, captured))
                 self._animate_move(r0, c0, r, c, piece)
-                # atualiza modelo
                 self.board.grid[r0][c0] = None
                 self.board.grid[r][c]   = piece
-                # rotaciona fila
                 self.turns.append(self.turns.pop(0))
-            # limpa seleção e destaques
+                # verifica vitória
+                if isinstance(captured, King):
+                    self.show_victory(piece.color)
             self.selected = None
             self.possible_moves = []
         self._draw_board()
@@ -207,8 +196,7 @@ class Game:
                 if (round(y)//SQUARE_SIZE, round(x)//SQUARE_SIZE) == (r0, c0):
                     img_obj = obj
                     break
-        if not img_obj:
-            return
+        if not img_obj: return
         dx = (c1 - c0)*SQUARE_SIZE/ANIM_STEPS
         dy = (r1 - r0)*SQUARE_SIZE/ANIM_STEPS
         def step(count=0):
@@ -218,13 +206,31 @@ class Game:
         step()
 
     def undo(self):
-        if not self.history:
-            return
+        if not self.history: return
         r0, c0, piece, r1, c1, captured = self.history.pop()
         self.board.grid[r0][c0] = piece
         self.board.grid[r1][c1] = captured
-        # desfaz fila
         self.turns.insert(0, self.turns.pop())
+        self.selected = None
+        self.possible_moves = []
+        self._draw_board()
+
+    def show_victory(self, winner):
+        win = tk.Toplevel()
+        win.title("Vitória!")
+        msg = "Jogador Branco venceu!" if winner == 'w' else "Jogador Preto venceu!"
+        label = tk.Label(win, text=msg, font=(None, 16))
+        label.pack(padx=20, pady=10)
+        btn = tk.Button(win, text="Recomeçar", command=lambda: self.restart(win))
+        btn.pack(pady=(0,20))
+
+    def restart(self, win_window):
+        # fecha janela de vitória
+        win_window.destroy()
+        # reinicializa components do jogo
+        self.board = Board(self)
+        self.turns = ['w','b']
+        self.history = []
         self.selected = None
         self.possible_moves = []
         self._draw_board()
@@ -232,7 +238,7 @@ class Game:
 # --- Início da Aplicação ---
 if __name__ == "__main__":
     root = tk.Tk()
-    root.title("Xadrez – Python Tkinter com Pré-visualização")
+    root.title("Xadrez – Python Tkinter com Tela de Vitória")
     canvas = tk.Canvas(root, width=SQUARE_SIZE*BOARD_SIZE,
                        height=SQUARE_SIZE*BOARD_SIZE)
     canvas.pack()
